@@ -9,11 +9,12 @@
  * Description: A plugin for finding hooks in WordPress and generating docs
  */
 
+include 'cpt/action-hook.php';
 
 class HookBook {
 
     function __construct() {
-
+        new ActionHook();
     }
 
 }
