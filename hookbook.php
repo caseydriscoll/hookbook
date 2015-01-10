@@ -10,11 +10,13 @@
  */
 
 include 'cpt/action-hook.php';
+include 'cpt/filter-hook.php';
 
 class HookBook {
 
     function __construct() {
         new ActionHook();
+        new FilterHook();
     }
 
 }
