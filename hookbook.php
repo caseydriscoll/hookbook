@@ -207,8 +207,10 @@ class HookBook {
                     if ( substr( $hook, -1 ) == "_" )
                         $hook .= '{$var}';
 
-                    if ( false ) // it already exists
+                    if ( get_page_by_title( $hook, ARRAY_N, $type . '_hook' ) !== null ) // it already exists
                         $complete = 'complete ';
+                    else
+                        $complete = '';
 
                     $out .= '<li class="' . $complete . $type . '-hook" data-hook="' . $hook . '">
                                 <span class="' . $type . '-hook">' . $type . '</span>' . htmlspecialchars( $hook ) . 
@@ -240,7 +242,7 @@ class HookBook {
             'post_status' => 'publish'
         );
 
-        error_log( wp_insert_post( $hook ) );
+        wp_insert_post( $hook );
 
         wp_send_json_success( array( 'i' => $_POST['i'] ) );
     }
