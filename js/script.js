@@ -9,7 +9,11 @@ jQuery( document ).ready( function() {
 
         last = jQuery( '.hook-list li' ).length;
 
-        generatePost( current, jQuery( '.hook-list li:first' ).data( 'hook' ) );
+        generatePost(
+            jQuery( '.hook-list li:first' ).data( 'hook' ),
+            jQuery( '.hook-list li:first span' ).text(),
+            current
+        );
 
     } );
 
@@ -33,13 +37,14 @@ jQuery( document ).ready( function() {
 } );
 
 
-function generatePost( i, hook ) {
+function generatePost( hook, type, i ) {
 
     jQuery.post(
         '/wp-admin/admin-ajax.php',
         {
             'action' : 'generate_hook_post',
             'hook'   : hook,
+            'type'   : type,
             'i'      : i
         },
         function( response ) {
@@ -56,7 +61,11 @@ function generatePost( i, hook ) {
 
             console.log( current, last, response );
 
-            generatePost( ++current, jQuery( jQuery( '.hook-list li' ).get( data.i ) ).data( 'hook' ) )
+            generatePost(
+                jQuery( jQuery( '.hook-list li' ).get( data.i ) ).data( 'hook' ),
+                jQuery( jQuery( '.hook-list li' ).get( data.i ) ).find( 'span' ).text(),
+                ++current
+            );
         }
     );
 

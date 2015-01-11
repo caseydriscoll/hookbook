@@ -233,7 +233,14 @@ class HookBook {
      * @return  void   
      */
     function generate_hook_post() {
-        error_log( 'i: ' . $_POST['i'] );
+        
+        $hook = array(
+            'post_title'  => $_POST['hook'],
+            'post_type'   => $_POST['type'] . '_hook',
+            'post_status' => 'publish'
+        );
+
+        error_log( wp_insert_post( $hook ) );
 
         wp_send_json_success( array( 'i' => $_POST['i'] ) );
     }
