@@ -132,15 +132,39 @@ class HookBook {
                     box-sizing: border-box;
                     }
                     .hook-list li {
-                        display: inline-block;
+                        display: inline-block; position: relative;
                         padding: 15px; margin: 2px;
                         border: 1px solid #ccc;
-                        background: #f1f1f1;
+                        border-left: 5px solid #ccc;
+                        background: #e4e4e4;
+                        }
+                        .hook-list li.action_hook {
+                            border-left-color: red;
+                        }
+                        .hook-list li.filter_hook {
+                            border-left-color: blue;
                         }
                         .hook-list li:hover {
                             background: #fff;
                             cursor: pointer;
                         }
+                        .hook-list li span {
+                            display: none; position: absolute;
+                            left: 5px; top: -8px;
+                            padding: 0px 6px;
+                            border-radius: 3px;
+                            font-size: 6px;
+                            color: #fff;
+                            }
+                            .hook-list li:hover span {
+                                display: block;
+                            }
+                            .hook-list li span.action_hook {
+                                background: red;
+                            }
+                            .hook-list li span.filter_hook {
+                                background: blue;
+                            }
                 .clearfix:after {
                     visibility: hidden;
                     display: block;
@@ -227,16 +251,21 @@ class HookBook {
             // echo '<pre>' . $file[0] . '</pre>';
 
             foreach( file( $file[0] ) as $number => $line ) {
-                $position = strpos( $line, 'do_action(' ) || strpos( $line, 'do_filter(' );
-                if ( $position !== false ) {
-                    $action = explode( '\'', trim( substr( $line, $position + strlen( 'do_action(' ) ) ) )[1];
-                    
-                    if ( $action == '' ) continue;
+                if ( $position = strpos( $line, 'do_action(' ) !== false ) {
+                    $type = 'action';  
+                    $hook = explode( '\'', trim( substr( $line, $position + strlen( 'do_action(' ) ) ) )[1];
+                } elseif ( $position = strpos( $line, 'apply_filters(' ) !== false ) {
+                    $type = 'filter';
+                    $hook = explode( '\'', trim( substr( $line, $position + strlen( 'apply_filters(' ) ) ) )[1];
+                }
 
-                    if ( substr( $action, -1 ) == "_" )
-                        $action .= '{$var}';
+                if ( $position !== false) {
+                    if ( $hook == '' ) continue;
 
-                    $out .= '<li>' . htmlspecialchars( $action ) . '</li>';
+                    if ( substr( $hook, -1 ) == "_" )
+                        $hook .= '{$var}';
+
+                    $out .= '<li class="' . $type . '_hook"><span class="' . $type . '_hook">' . $type . '</span>' . htmlspecialchars( $hook ) . '</li>';
                 }
             }
 
