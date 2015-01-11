@@ -232,17 +232,28 @@ class HookBook {
      *
      * @author  caseypatrickdriscoll
      *
+     * @created 2015-01-11 17:32:21
+     * @edited  2015-01-11 18:41:35
+     *
      * @return  void   
      */
     function generate_hook_post() {
         
         $hook = array(
-            'post_title'  => $_POST['hook'],
-            'post_type'   => $_POST['type'] . '_hook',
-            'post_status' => 'publish'
+            'post_title'   => $_POST['hook'],
+            'post_type'    => $_POST['type'] . '_hook',
+            'post_content' => 'the content',
+            'post_status'  => 'publish'
         );
 
-        wp_insert_post( $hook );
+        $post = get_page_by_title( $hook['post_title'], ARRAY_A, $hook['post_type'] );
+
+        if ( $post === null )
+            wp_insert_post( $hook );
+        else {
+            $post['post_content'] .= $hook['post_content'];
+            wp_update_post( $post );
+        }
 
         wp_send_json_success( array( 'i' => $_POST['i'] ) );
     }
