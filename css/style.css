@@ -1,0 +1,106 @@
+html, body {
+    height: 100%;
+}
+.wrap {
+    display: block; position: relative;
+    height: 100%;
+}
+h2.nav-tab-wrapper {
+    margin-bottom: 20px;
+}
+h2.plugins {
+    float: left;
+    width: 20%;
+}
+h2.nav-tab-wrapper.vertical {
+    display: block; position: relative;
+    height: 100%;
+    padding: 10px 0 12px 0; margin-bottom: 0; margin-left: -1px;
+    border-right: 1px solid #ccc; border-bottom: none;
+    /*box-sizing: border-box;*/
+}
+.vertical .nav-tab {
+    display: block;
+    width: auto;
+    padding-right: 0; margin-top: 10px; margin-right: -1px;
+    border-bottom: 1px solid #ccc;
+    }
+    .vertical .nav-tab-active {
+        border-right: 1px solid #f1f1f1;
+    }
+
+.hook-list {
+    display: block; float: left;
+    width: 80%;
+    padding: 10px; margin: 0;
+    border: 1px solid #ccc; border-left: none;
+    box-sizing: border-box;
+    }
+    .hook-list.actions-only #actions-only { background-color: #fff; }
+    .hook-list.filters-only #filters-only { background-color: #fff; }
+    .hook-list.actions-only li.filter-hook { display: none; }
+    .hook-list.filters-only li.action-hook { display: none; }
+
+    .hook-list .nav-tab-wrapper {
+        border: none;
+        }
+        .hook-list .nav-tab-wrapper .nav-tab {
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .hook-list .nav-tab-wrapper #generate-progress { display: none; float: right; }
+    .hook-list li {
+        display: inline-block; position: relative;
+        padding: 15px; margin: 2px;
+        border: 1px solid #ccc;
+        background: #e4e4e4;
+        }
+        .hook-list li.action-hook, #actions-only {
+            border-left: 5px solid red;
+        }
+        .hook-list li.filter-hook, #filters-only {
+            border-left: 5px solid blue;
+        }
+        .hook-list li.complete, #generate-progress.complete {
+            background-color: #D5FDD5;
+        }
+        .hook-list li:hover {
+            background: #fff;
+            cursor: pointer;
+        }
+        .hook-list li span {
+            display: none; position: absolute;
+            left: 5px; top: -8px;
+            padding: 0px 6px;
+            border-radius: 3px;
+            font-size: 6px;
+            color: #fff;
+            }
+            .hook-list li:hover span {
+                display: block;
+            }
+            .hook-list li span.action-hook {
+                background: red;
+            }
+            .hook-list li span.filter-hook {
+                background: blue;
+            }
+.clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+    }
+* html .clearfix             { zoom: 1; } /* IE6 */
+*:first-child+html .clearfix { zoom: 1; } /* IE7 */
+
+
+i.spinner {
+    background: url('/wp-admin/images/wpspin_light.gif') no-repeat;
+    background-size: 16px 16px;
+    width: 16px;
+    height: 16px;
+    margin: 5px 5px 0;
+}

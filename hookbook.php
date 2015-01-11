@@ -18,8 +18,27 @@ class HookBook {
         new ActionHook();
         new FilterHook();
 
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_styles_and_scripts' ) );
+
         add_action( 'admin_menu', array( $this, 'register_menu' ) );
 
+        add_action( 'wp_ajax_generate_hook_post', array( $this, 'generate_hook_post' ) );
+    }
+
+
+    /**
+     * Registers the needed styles and scripts
+     *
+     * @author caseypatrickdriscoll
+     *
+     * 
+     */
+    function register_styles_and_scripts() {
+        if ( $_GET['page'] !== 'hookbook' ) return;
+
+        wp_register_style( 'hookbook', plugin_dir_url( __FILE__ ) . 'css/style.css' );
+
+        wp_register_script( 'hookbook', plugin_dir_url( __FILE__ ) . 'js/script.js', array( 'jquery' ) );
     }
 
 
@@ -65,6 +84,8 @@ class HookBook {
      * @return void
      */
     function render() { 
+        wp_enqueue_style( 'hookbook' );
+        wp_enqueue_script( 'hookbook' );
         
         $current['tab'] = isset( $_GET['tab'] ) ? $_GET['tab'] : 'plugins';
 
@@ -91,91 +112,6 @@ class HookBook {
                 }
             ?>
             </h2>
-
-            <style>
-                html, body {
-                    height: 100%;
-                }
-                .wrap {
-                    display: block; position: relative;
-                    height: 100%;
-                }
-                h2.nav-tab-wrapper {
-                    margin-bottom: 20px;
-                }
-                h2.plugins {
-                    float: left;
-                    width: 20%;
-                }
-                h2.nav-tab-wrapper.vertical {
-                    display: block; position: relative;
-                    height: 100%;
-                    padding: 10px 0 12px 0; margin-bottom: 0; margin-left: -1px;
-                    border-right: 1px solid #ccc; border-bottom: none;
-                    /*box-sizing: border-box;*/
-                }
-                .vertical .nav-tab {
-                    display: block;
-                    width: auto;
-                    padding-right: 0; margin-top: 10px; margin-right: -1px;
-                    border-bottom: 1px solid #ccc;
-                    }
-                    .vertical .nav-tab-active {
-                        border-right: 1px solid #f1f1f1;
-                    }
-
-                .hook-list {
-                    display: block; float: left;
-                    width: 80%;
-                    padding: 10px; margin: 0;
-                    border: 1px solid #ccc; border-left: none;
-                    box-sizing: border-box;
-                    }
-                    .hook-list li {
-                        display: inline-block; position: relative;
-                        padding: 15px; margin: 2px;
-                        border: 1px solid #ccc;
-                        border-left: 5px solid #ccc;
-                        background: #e4e4e4;
-                        }
-                        .hook-list li.action_hook {
-                            border-left-color: red;
-                        }
-                        .hook-list li.filter_hook {
-                            border-left-color: blue;
-                        }
-                        .hook-list li:hover {
-                            background: #fff;
-                            cursor: pointer;
-                        }
-                        .hook-list li span {
-                            display: none; position: absolute;
-                            left: 5px; top: -8px;
-                            padding: 0px 6px;
-                            border-radius: 3px;
-                            font-size: 6px;
-                            color: #fff;
-                            }
-                            .hook-list li:hover span {
-                                display: block;
-                            }
-                            .hook-list li span.action_hook {
-                                background: red;
-                            }
-                            .hook-list li span.filter_hook {
-                                background: blue;
-                            }
-                .clearfix:after {
-                    visibility: hidden;
-                    display: block;
-                    font-size: 0;
-                    content: " ";
-                    clear: both;
-                    height: 0;
-                    }
-                * html .clearfix             { zoom: 1; } /* IE6 */
-                *:first-child+html .clearfix { zoom: 1; } /* IE7 */
-            </style>
 
             <?php 
             switch( $current['tab'] ) {
@@ -205,6 +141,12 @@ class HookBook {
 
                     </h2>
                     <ul class="hook-list clearfix">
+                        <h2 class="nav-tab-wrapper">
+                            <a id="generate-posts" class="nav-tab">Generate All Posts</a>
+                            <a id="actions-only" class="nav-tab">Actions Only</a>
+                            <a id="filters-only" class="nav-tab">Filters Only</a>
+                            <a id="generate-progress" class="nav-tab">Generating <i class="spinner"></i><span class="total"></span></a>
+                        </h2>
                         <?php echo $current['hooklist']; ?>
                     </ul>
 
@@ -246,7 +188,7 @@ class HookBook {
         foreach( $regex as $file ) {
             $not_file = array( '.', '..', '.git', '.htaccess' );
 
-            if ( in_array( $file, $not_file ) ) continue;
+            if ( in_array( $file[0], $not_file ) ) continue;
 
             // echo '<pre>' . $file[0] . '</pre>';
 
@@ -265,7 +207,12 @@ class HookBook {
                     if ( substr( $hook, -1 ) == "_" )
                         $hook .= '{$var}';
 
-                    $out .= '<li class="' . $type . '_hook"><span class="' . $type . '_hook">' . $type . '</span>' . htmlspecialchars( $hook ) . '</li>';
+                    if ( false ) // it already exists
+                        $complete = 'complete ';
+
+                    $out .= '<li class="' . $complete . $type . '-hook" data-hook="' . $hook . '">
+                                <span class="' . $type . '-hook">' . $type . '</span>' . htmlspecialchars( $hook ) . 
+                            '</li>';
                 }
             }
 
@@ -273,9 +220,22 @@ class HookBook {
 
         if ( $out == '' ) $out = '<h3>No hooks in ' . ucwords( $current['plugin'] ) . '</h3>';
 
-        $out .= '<br style="clear:both;" />';
-
         return $out;
+    }
+
+
+    /**
+     * Inserts or updates a new 'action' or 'filter' custom post type
+     *    'Returns' a success reponse
+     *
+     * @author  caseypatrickdriscoll
+     *
+     * @return  void   
+     */
+    function generate_hook_post() {
+        error_log( 'i: ' . $_POST['i'] );
+
+        wp_send_json_success( array( 'i' => $_POST['i'] ) );
     }
 
 }
